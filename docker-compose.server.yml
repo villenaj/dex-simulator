@@ -1,0 +1,17 @@
+# Dev server (192.168.254.200) 용. 같은 호스트의 노드에 직접 붙고, 로컬 infra 네트워크는 쓰지 않습니다.
+# docker compose -f docker-compose.server.yml up -d --build
+# 스왑은 체인에만 전송되고, DB 는 서버의 xode-queue-agent 가 채웁니다.
+services:
+  simulator:
+    build: .
+    image: xodex-simulator:local
+    container_name: xodex-simulator
+    restart: unless-stopped
+    command: ["live"]
+    env_file: .env
+    network_mode: host
+    environment:
+      SIM_RPC_URL: ws://127.0.0.1:9977
+      TZ: ${TZ:-Asia/Manila}
+    volumes:
+      - ./state:/app/state
