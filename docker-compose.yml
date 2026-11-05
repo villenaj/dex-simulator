@@ -1,0 +1,29 @@
+# Joins the network created by ../docker-compose.infra.yml so "mongo" / "mariadb" resolve.
+# Start the infra stack first: docker compose -f ../docker-compose.infra.yml up -d
+services:
+  simulator:
+    build: .
+    image: xodex-simulator:local
+    container_name: xodex-simulator
+    restart: unless-stopped
+    user: "1000:1000"
+    command: ["live"]
+    env_file: .env
+    environment:
+      MONGO_URI: mongo
+      MARIA_DB_HOST: mariadb
+      # 스왑은 Xode Local Testnet (192.168.254.200) 에 실제로 전송되고, DB 는 큐가 채웁니다.
+      # 아래 DB 설정은 purge (예전 버전의 가짜 데이터 삭제) 에서만 사용합니다. 이전 설정은 docker-compose.yml.bak
+      MONGO_DB_NAME: xode_indexer_testnet
+      MARIA_DB_NAME: dex_db_testnet
+      # 시간대별 활동 가중치가 호스트와 같은 기준이 되도록 맞춥니다.
+      TZ: ${TZ:-Asia/Manila}
+    volumes:
+      - ./state:/app/state
+    networks:
+      - infra
+
+networks:
+  infra:
+    external: true
+    name: rakson-opc-dex_default
